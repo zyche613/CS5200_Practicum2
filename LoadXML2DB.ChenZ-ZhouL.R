@@ -53,14 +53,36 @@ dbExecute(dbcon, journal_schema)
 dbExecute(dbcon, article_schema)
 dbExecute(dbcon, article_author_schema)
 
-# XML and DTD file 
-xmlFileURL <- "https://sendeyo.com/en/7cb87d1376"
-dtdFileURL <- "https://sendeyo.com/en/56a8588cd1"
-xmlData <- getURL(xmlFileURL)
-dtdData <- getURL(dtdFileURL)
+# XML and DTD file from URL
 
 # XML validation
-xmlObj <- xmlTreeParse(xmlData, dtdData)
+xmlLocal <- "pubmed-tfm-xml/pubmed22n0001-tf.xml"
+dtdLocal <- "pubmed.dtd"
+
+xmlObj <- xmlTreeParse(xmlLocal, dtdLocal)
 r <- xmlRoot(xmlObj)
 cnt <- xmlSize(r)
 print(cnt)
+
+# Store to data frame
+author_df <- data.frame(authorID = integer(),
+                        lastName = character(),
+                        firstName = character(),
+                        initials = character()
+                        )
+
+article_df <- data.frame(pmid = integer(),
+                         journalID = integer()
+                         )
+
+journal_df <- data.frame(journalID = integer(),
+                         journalTitle = character(),
+                         ISSN = character(),
+                         ISSOAbbreviation = character(),
+                         volume = character(),
+                         pubDate = character()
+                        )
+
+article_author_df <- data.frame(pmid = integer(),
+                                authorID = integer()
+                               )
