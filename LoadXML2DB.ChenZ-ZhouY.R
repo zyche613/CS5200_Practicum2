@@ -30,7 +30,7 @@ journal_schema <- SQL("CREATE TABLE Journals (
                     journalID INTEGER PRIMARY KEY,
                     journalTitle TEXT,
                     ISSN TEXT,
-                    ISSOAbbreviation TEXT,
+                    ISOAbbreviation TEXT,
                     volume TEXT,
                     pubDate Date
                   )")
@@ -79,7 +79,7 @@ article_df <- data.frame(articleID = integer(),
 journal_df <- data.frame(journalID = integer(),
                          journalTitle = character(),
                          ISSN = character(),
-                         ISSOAbbreviation = character(),
+                         ISOAbbreviation = character(),
                          volume = character(),
                          pubDate = character()
                         )
