@@ -31,8 +31,11 @@ journal_schema <- SQL("CREATE TABLE Journals (
                     journalTitle TEXT,
                     ISSN TEXT,
                     ISSOAbbreviation TEXT,
-                    volume TEXT,
-                    pubDate Date
+                    volume INTEGER,
+                    issue INTEGER,
+                    month INTEGER,
+                    day INTEGER,
+                    year INTEGER
                   )")
 
 article_schema <- SQL("CREATE TABLE Articles (
