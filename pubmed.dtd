@@ -5,7 +5,9 @@
 <!ELEMENT JournalIssue (Volume, Issue, PubDate)>
 <!ELEMENT PubDate ((Year, Month?, Day?) | (MedlineDate))>
 <!ELEMENT AuthorList (Author+)>
-<!ELEMENT Author (LastName, ForeName, Initials)>
+<!ELEMENT Author ((LastName, ForeName, Initials, Suffix?, AffiliationInfo?) | (CollectiveName))>
+<!ELEMENT AffiliationInfo (Affiliation)>
+<!ELEMENT Affiliation (#PCDATA)>
 <!ELEMENT ISSN (#PCDATA)>
 <!ELEMENT Volume (#PCDATA)>
 <!ELEMENT Issue (#PCDATA)>
@@ -19,8 +21,10 @@
 <!ELEMENT LastName (#PCDATA)>
 <!ELEMENT ForeName (#PCDATA)>
 <!ELEMENT Initials (#PCDATA)>
+<!ELEMENT CollectiveName (#PCDATA)>
+<!ELEMENT Suffix (#PCDATA)>
 <!ATTLIST Article PMID CDATA #REQUIRED>
 <!ATTLIST ISSN IssnType CDATA #REQUIRED>
 <!ATTLIST JournalIssue CitedMedium CDATA #REQUIRED>
-<!ATTLIST AuthorList CompleteYN CDATA #REQUIRED>
-<!ATTLIST Author ValidYN CDATA #REQUIRED>
+<!ATTLIST AuthorList CompleteYN (Y|N) "Y">
+<!ATTLIST Author ValidYN (Y|N) "Y">
