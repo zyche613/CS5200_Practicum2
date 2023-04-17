@@ -73,6 +73,7 @@ author_df <- data.frame(authorID = integer(),
                         )
 
 article_df <- data.frame(articleID = integer(),
+                         articleTitle = character(),
                          journalID = integer()
                          )
 
