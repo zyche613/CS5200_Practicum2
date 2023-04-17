@@ -26,13 +26,22 @@ author_schema <- SQL("CREATE TABLE Authors (
                    Initials TEXT
                   )")
 
+journalIssue_schema <- SQL("CREATE TABLE JournalIssue (
+                           journalIssueID INTEGER PRIMARY KEY,
+                           citedMedium TEXT,
+                           volume INTEGER,
+                           issue INTEGER,
+                           year INTEGER,
+                           month INTGER,
+                           day INTEGER")
+
 journal_schema <- SQL("CREATE TABLE Journals (
                     journalID INTEGER PRIMARY KEY,
+                    journalIssue INTEGER,
                     journalTitle TEXT,
                     ISSN TEXT,
                     ISOAbbreviation TEXT,
-                    volume TEXT,
-                    pubDate Date
+                    FOREIGN KEY (journalIssue) REFERENCES JournalIssue (journalIssueID)
                   )")
 
 article_schema <- SQL("CREATE TABLE Articles (
