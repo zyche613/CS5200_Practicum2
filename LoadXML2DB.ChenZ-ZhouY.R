@@ -76,6 +76,7 @@ author_df <- data.frame(authorID = integer(),
                         )
 
 article_df <- data.frame(articleID = integer(),
+                         articleTitle = character(),
                          journalID = integer()
                          )
 
@@ -83,8 +84,11 @@ journal_df <- data.frame(journalID = integer(),
                          journalTitle = character(),
                          ISSN = character(),
                          ISSOAbbreviation = character(),
-                         volume = character(),
-                         pubDate = character()
+                         volume = integer(),
+                         issue = integer(),
+                         month = integer(),
+                         day = integer(),
+                         year = integer()
                         )
 
 article_author_df <- data.frame(articleID = integer(),
