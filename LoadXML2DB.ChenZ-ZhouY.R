@@ -36,15 +36,15 @@ journal_schema <- SQL("CREATE TABLE Journals (
                   )")
 
 article_schema <- SQL("CREATE TABLE Articles (
-                    articleid INTEGER PRIMARY KEY,
+                    articleID INTEGER PRIMARY KEY,
                     journalID INTEGER,
                     FOREIGN KEY (journalID) REFERENCES Journals (journalID)
                   )")
 
 article_author_schema <- SQL("CREATE TABLE ArticleAuthor (
-                           pmid INTEGER,
+                           articleID INTEGER,
                            authorID INTEGER,
-                           FOREIGN KEY (articleid) REFERENCES Articles (articleid),
+                           FOREIGN KEY (articleID) REFERENCES Articles (articleID),
                            FOREIGN KEY (authorID) REFERENCES Authors (authorID)
                           )")
 
@@ -71,7 +71,7 @@ author_df <- data.frame(authorID = integer(),
                         initials = character()
                         )
 
-article_df <- data.frame(pmid = integer(),
+article_df <- data.frame(articleID = integer(),
                          journalID = integer()
                          )
 
@@ -83,6 +83,6 @@ journal_df <- data.frame(journalID = integer(),
                          pubDate = character()
                         )
 
-article_author_df <- data.frame(pmid = integer(),
+article_author_df <- data.frame(articleID = integer(),
                                 authorID = integer()
                                )
