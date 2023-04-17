@@ -38,6 +38,7 @@ journal_schema <- SQL("CREATE TABLE Journals (
 article_schema <- SQL("CREATE TABLE Articles (
                     articleID INTEGER PRIMARY KEY,
                     journalID INTEGER,
+                    articleTitle TEXT,
                     FOREIGN KEY (journalID) REFERENCES Journals (journalID)
                   )")
 
