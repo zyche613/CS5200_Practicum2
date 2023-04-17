@@ -30,12 +30,9 @@ journal_schema <- SQL("CREATE TABLE Journals (
                     journalID INTEGER PRIMARY KEY,
                     journalTitle TEXT,
                     ISSN TEXT,
-                    ISSOAbbreviation TEXT,
-                    volume INTEGER,
-                    issue INTEGER,
-                    month INTEGER,
-                    day INTEGER,
-                    year INTEGER
+                    ISOAbbreviation TEXT,
+                    volume TEXT,
+                    pubDate Date
                   )")
 
 article_schema <- SQL("CREATE TABLE Articles (
@@ -83,12 +80,9 @@ article_df <- data.frame(articleID = integer(),
 journal_df <- data.frame(journalID = integer(),
                          journalTitle = character(),
                          ISSN = character(),
-                         ISSOAbbreviation = character(),
-                         volume = integer(),
-                         issue = integer(),
-                         month = integer(),
-                         day = integer(),
-                         year = integer()
+                         ISOAbbreviation = character(),
+                         volume = character(),
+                         pubDate = character()
                         )
 
 article_author_df <- data.frame(articleID = integer(),
