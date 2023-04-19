@@ -1,0 +1,57 @@
+---
+title: "Practicum 2, part3, Explore and Mine Data"
+author: "Zhengyuan Chen & Yi Zhou"
+output: html_notebook
+---
+
+
+## 1.Create an R Notebook
+
+Connect to the databases
+```{r database_setup, eval = T, warning = F}
+library(RMySQL)
+# Connect to the MySQL database
+db_user <- 'root'
+db_password <- 'password'
+db_name <- 'p2_db'
+db_host <- 'localhost' 
+db_port <- 3306
+
+# db connection
+mydb <-  dbConnect(RMySQL::MySQL(), user = db_user, password = db_password,
+                   dbname = db_name, host = db_host, port = db_port)
+```
+
+## 2.use markdown to write a "report" which shows the results of the following analytical queries against your MySQL data warehouse from Part 2
+
+# Analytical Query I: Top five journals with the most articles published in them for the time period. 
+```{sql connection=mydb}
+SELECT journalTitle, sum(articleNumbers) AS sumOfArticles
+FROM journalFact NATURAL JOIN journalDim
+GROUP BY journalID
+ORDER BY sumOfArticles DESC
+LIMIT 5
+```
+
+# Analytical Query II: Number of articles per journal per year broken down by quarter.
+```{r , eval = T, warning = F}
+# Store the result to a dataframe
+journal_per_year <- dbGetQuery(mydb, 
+   "SELECT journalID, journalTitle, year, quarter, SUM(articleNumbers) AS sumPerQuarter
+    FROM JournalFact NATURAL JOIN JournalDim
+    WHERE year >= 2012 AND year <= 2015
+    GROUP BY journalID, year, quarter")
+incidents_by_phase_month
+```
+
+
+
+```{sql connection=mydb}
+
+```
+
+Disconnect to the databases
+```{r}
+# Disconnect the MySQL database
+dbDisconnect(mydb)
+```

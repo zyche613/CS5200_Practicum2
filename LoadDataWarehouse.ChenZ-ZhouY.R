@@ -34,30 +34,50 @@ dbfile = "article.db"
 litedb <- dbConnect(RSQLite::SQLite(), paste0(fpath, dbfile))
 
 # Create the Journal Fact Table
-dbExecute(mydb, "DROP TABLE IF EXISTS Journals;")
+dbExecute(mydb, "DROP TABLE IF EXISTS JournalFact;")
+dbExecute(mydb, "DROP TABLE IF EXISTS JournalDim;")
 dbExecute(mydb, 
-"CREATE TABLE Journals (
+          "CREATE TABLE JournalDim (
   journalID INTEGER PRIMARY KEY,
   journalTitle TEXT,
   ISSN TEXT,
-  ISOAbbreviation TEXT,
+  ISOAbbreviation TEXT
+)")
+dbExecute(mydb, 
+"CREATE TABLE JournalFact (
+  journalIssueID INTEGER PRIMARY KEY,
+  journalID INTEGER,
+  citedMedium Text,
   volume INTEGER,
   issue INTEGER,
   year INTEGER,
   month INTEGER,
   articleNumbers INTEGER,
-  authoerNumbers INTEGER
+  authoerNumbers INTEGER，
+  FOREIGN KEY (journalID) REFERENCES JournalDim (journalID)
 )")
 
-# Get Journal info from the SQLite database
+# Get Journal dimention from the SQLite database
+journal_dim <- dbGetQuery(litedb, 
+                          "SELECT *
+                          FROM journals
+                          ")
+
+# Get Journal dimention from the SQLite database
 journal_fact <- dbGetQuery(litedb, "
-SELECT journalID, journalTitle, ISSN, ISOAbbreviation, volume, issue, year, month, 
-COUNT(DISTINCT articleID), COUNT(DISTINCT authorID)
-FROM Journals
+SELECT journalIssueID, journalID, citedMedium, volume, issue, year,
+(CASE 
+WHEN month IN (1,2,3) THEN 1
+WHEN month IN (4,5,6) THEN 2
+WHEN month IN (7,8,9) THEN 3
+WHEN month IN (10,11,12) THEN 4
+ELSE 0
+END) AS quarter, month, day, COUNT(DISTINCT articleID), COUNT(DISTINCT authorID)
+FROM JournalIssue
 NATURAL JOIN Articles
 NATURAL JOIN ArticleAuthor
 NATURAL JOIN Authors
-GROUP BY journalID
+GROUP BY journalIssueID
 ")
 
 # Write to MySQL database
@@ -67,32 +87,32 @@ dbWriteTable(mydb,"Journal", journal_fact, append=TRUE, row.names=FALSE)
 # Your star schema must support analytical queries such as these:
 
 # What the are number of articles published in every journal in 2012 and 2013?
-res1 <- dbGetQuery(mydb, "SELECT journalID, journalTitle, SUM(articleNumbers) 
-           FROM Journals
+res1 <- dbGetQuery(mydb, "SELECT journalTitle, year, SUM(articleNumbers) 
+           FROM JournalFact NATURAL JOIN JournalDim
            WHERE year = 2012 OR year = 2013
-           GROUP BY journalID
+           GROUP BY journalID, year
            ")
 print(res1)
 
 # What is the number of articles published in every journal in each quarter of 2012 through 2015?
-res2 <- dbGetQuery(mydb, "SELECT journal_id, title, year, quarter, SUM(articles) AS number_of_articles
-           FROM Journal
-           WHERE year >= 1975 AND year <= 1979
-           GROUP BY journal_id, title, year, quarter
+res2 <- dbGetQuery(mydb, "SELECT journalTitle, year, quarter, SUM(articleNumbers)
+           FROM JournalFact NATURAL JOIN JournalDim
+           WHERE year >= 2012 AND year <= 2015
+           GROUP BY journalID, year, quarter
            ")
 print(res2)
 
 # How many articles were published each quarter (across all years)?
-res <- dbGetQuery(mydb, "SELECT quarter, SUM(articles) AS number_of_articles
-           FROM Journal
+res <- dbGetQuery(mydb, "SELECT quarter, SUM(articleNumbers)
+           FROM JournalFact
            GROUP BY quarter
            ")
 print(res3)
 
 # How many unique authors published articles in each year for which there is data?
-res4 <- dbGetQuery(mydb, "SELECT quarter, SUM(articles) AS number_of_articles
-           FROM Journal
-           GROUP BY quarter
+res4 <- dbGetQuery(mydb, "SELECT year, SUM(authorNumbers)
+           FROM JournalFact
+           GROUP BY year
            ")
 print(res4)
   
