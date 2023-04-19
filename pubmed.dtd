@@ -1,11 +1,12 @@
 <!ELEMENT Publications (Article+)>
 <!ELEMENT Article (PubDetails)>
-<!ELEMENT PubDetails (Journal, ArticleTitle, AuthorList)>
+<!ELEMENT PubDetails (Journal, ArticleTitle, AuthorList?)>
 <!ELEMENT Journal (ISSN, JournalIssue, Title, ISOAbbreviation)>
 <!ELEMENT JournalIssue (Volume, Issue, PubDate)>
 <!ELEMENT PubDate ((Year, Month?, Day?) | (MedlineDate))>
 <!ELEMENT AuthorList (Author+)>
-<!ELEMENT Author ((LastName, ForeName, Initials, Suffix?, AffiliationInfo?) | (CollectiveName))>
+<!ELEMENT Author ((LastName, ForeName, Initials, Suffix?, AffiliationInfo?, CollectiveName?) | (CollectiveName))>
+<!ELEMENT CollectiveName (#PCDATA)>
 <!ELEMENT AffiliationInfo (Affiliation)>
 <!ELEMENT Affiliation (#PCDATA)>
 <!ELEMENT ISSN (#PCDATA)>
