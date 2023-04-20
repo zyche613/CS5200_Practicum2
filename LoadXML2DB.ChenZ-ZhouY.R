@@ -31,7 +31,8 @@ author_schema <- SQL("CREATE TABLE Authors (
                    initials TEXT,
                    suffix TEXT,
                    affiliationId INTEGER,
-                   FOREIGN KEY (affiliationId) REFERENCES 
+                   collectiveName TEXT,
+                   FOREIGN KEY (affiliationId) REFERENCES Affiliation (affiliationId)
                   )")
 
 journalIssue_schema <- SQL("CREATE TABLE JournalIssue (
@@ -85,7 +86,7 @@ dtdLocal <- "pubmed.dtd"
 xmlObj <- xmlTreeParse(xmlLocal, dtdLocal)
 r <- xmlRoot(xmlObj)
 cnt <- xmlSize(r)
-
+print(cnt)
 # Load data from xml by node traversal
 articleIdVector <- c()
 articleIdDupVector <- c()
@@ -126,8 +127,9 @@ for (i in 1:cnt) {
   articleIdVector <- c(articleIdVector, i)
   aArticle <- r[[i]]
   authorList <- aArticle[[1]][["AuthorList"]]
-  numOfAuthor <- 0      
-  if (!is.null(authorList)) {
+  numOfAuthor <- 0
+  if (length(authorList) > 0) {
+    if (!is.na(authorList)) {
     numOfAuthor <- xmlSize(authorList)
     isComplete <- "N"
     isComplete <- xmlAttrs(authorList)[["CompleteYN"]]
@@ -141,27 +143,27 @@ for (i in 1:cnt) {
         suffix <- "NA"
         affiliation <- "NA"
         # Get CollectiveName if any
-        if (!is.null(xmlValue(authorList[[j]][["CollectiveName"]]))) {
+        if (!is.na(xmlValue(authorList[[j]][["CollectiveName"]]))) {
           collectiveName = xmlValue(authorList[[j]][["CollectiveName"]])
         }
         # Get LastName if any
-        if (!is.null(xmlValue(authorList[[j]][["LastName"]]))) {
+        if (!is.na(xmlValue(authorList[[j]][["LastName"]]))) {
           lastName = xmlValue(authorList[[j]][["LastName"]])
         }
         # Get ForeName if any
-        if (!is.null(xmlValue(authorList[[j]][["ForeName"]]))) {
+        if (!is.na(xmlValue(authorList[[j]][["ForeName"]]))) {
           foreName = xmlValue(authorList[[j]][["ForeName"]])
         }
         # Get Initials if any
-        if (!is.null(xmlValue(authorList[[j]][["Initials"]]))) {
+        if (!is.na(xmlValue(authorList[[j]][["Initials"]]))) {
           initials = xmlValue(authorList[[j]][["Initials"]])
         }
         # Get Suffix if any
-        if (!is.null(xmlValue(authorList[[j]][["Suffix"]]))) {
+        if (!is.na(xmlValue(authorList[[j]][["Suffix"]]))) {
           suffix = xmlValue(authorList[[j]][["Suffix"]])
         }
         # Get AffiliationInfo if any
-        if (!is.null(xmlValue(authorList[[j]][["AffiliationInfo"]]))) {
+        if (!is.na(xmlValue(authorList[[j]][["AffiliationInfo"]]))) {
           affiliation = xmlValue(authorList[[j]][["AffiliationInfo"]][["Affiliation"]])
         }
         # Append all info for future use
@@ -176,42 +178,46 @@ for (i in 1:cnt) {
       }
     }  
   } else {
-    collectiveName <- "NA"
-    lastName <- "NA"
-    foreName <- "NA"
-    initials <- "NA"
-    suffix <- "NA"
-    affiliation <- "NA"
-    isComplete <- "N"
-    authorCnVector <- c(authorCnVector, "NA")
-    authorLnVector <- c(authorLnVector, "NA")
-    authorFnVector <- c(authorFnVector, "NA")
-    authorInitVector <- c(authorInitVector, "NA")
-    authorSuffVector <- c(authorSuffVector, "NA")
-    authorAffVector <- c(authorAffVector, "NA")
-    articleIdDupVector <- c(articleIdDupVector, i)
-    validVector <- c(validVector, "N")
-    authorCompVector <- c(authorCompVector, "N")
+      authorCnVector <- c(authorCnVector, "NA")
+      authorLnVector <- c(authorLnVector, "NA")
+      authorFnVector <- c(authorFnVector, "NA")
+      authorInitVector <- c(authorInitVector, "NA")
+      authorSuffVector <- c(authorSuffVector, "NA")
+      authorAffVector <- c(authorAffVector, "NA")
+      articleIdDupVector <- c(articleIdDupVector, i)
+      validVector <- c(validVector, "N")
+      authorCompVector <- c(authorCompVector, "N")
+    }
+  } else {
+      authorCnVector <- c(authorCnVector, "NA")
+      authorLnVector <- c(authorLnVector, "NA")
+      authorFnVector <- c(authorFnVector, "NA")
+      authorInitVector <- c(authorInitVector, "NA")
+      authorSuffVector <- c(authorSuffVector, "NA")
+      authorAffVector <- c(authorAffVector, "NA")
+      articleIdDupVector <- c(articleIdDupVector, i)
+      validVector <- c(validVector, "N")
+      authorCompVector <- c(authorCompVector, "N")
   }
-    
+  
   # Get ISSN, IssnType, Title, ISOAbbreviation
   ISSN = "NULL"
   IssnType = "NULL"
   title = "NULL"
   ISOAbbreviation = "NULL"
   Journal <- aArticle[[1]][["Journal"]]
-  if (!is.null(xmlValue(Journal))) {
+  if (!is.na(xmlValue(Journal))) {
     ISSNNode <- Journal[["ISSN"]]
-    if (!is.null(xmlValue(ISSNNode))) {
+    if (!is.na(xmlValue(ISSNNode))) {
       ISSN = xmlValue(ISSNNode)
       IssnType = xmlAttrs(ISSNNode)[["IssnType"]]
     }
     titleNode <- Journal[["Title"]]
-    if (!is.null(xmlValue(titleNode))) {
+    if (!is.na(xmlValue(titleNode))) {
       title = xmlValue(titleNode)
     }
     ISOAbbreviationNode <- Journal[["ISOAbbreviation"]]
-    if (!is.null(xmlValue(ISOAbbreviationNode))) {
+    if (!is.na(xmlValue(ISOAbbreviationNode))) {
       ISOAbbreviation = xmlValue(ISOAbbreviationNode)
     }
   }
@@ -227,42 +233,48 @@ for (i in 1:cnt) {
   # Get journal issue info, including both attributes and nested fields
   JournalIssue <- Journal[["JournalIssue"]]
   cited_medium <- "NA"
-  if (!is.null(xmlValue(JournalIssue))) {
+  if (!is.na(xmlValue(JournalIssue))) {
     cited_medium <- xmlAttrs(JournalIssue)[["CitedMedium"]]
   }
-  citedMedVector <- c(citedMedVector, cited_medium)
+  
   volume <- 0
   issue <- 0
   year <- 2000
   month <- 1
   day <- 1
   # Get volume if any
-  if (!is.null(xmlValue(JournalIssue[["Volume"]]))) {
+  if (!is.na(xmlValue(JournalIssue[["Volume"]]))) {
     volume <- xmlValue(JournalIssue[["Volume"]])
+    volume <- as.integer(volume)
   }
   # Get Issue if any
-  if (!is.null(xmlValue(JournalIssue[["Issue"]]))) {
+  if (!is.na(xmlValue(JournalIssue[["Issue"]]))) {
     issue <- xmlValue(JournalIssue[["Issue"]])
+    issue <- as.integer(issue)
   }
   # Get pubDate and the detail time, i.e. year, month, medline date
   pubDate <- JournalIssue[["PubDate"]]
-  if (!is.null(xmlValue(pubDate[["Year"]]))) {
+  if (!is.na(xmlValue(pubDate[["Year"]]))) {
     year <- xmlValue(pubDate[["Year"]])
-  }
-  if (!is.null(xmlValue(pubDate[["Month"]]))) {
+    year <- as.integer(year)
+  } 
+  if (!is.na(xmlValue(pubDate[["Month"]]))) {
     mon <- xmlValue(pubDate[["Month"]])
-    if (nchar(mon) == 2) {
-      month <- as.integer(mon)
-    } else {
+    # month represented as two digits
+    if (nchar(mon) == 2)
+      month <- mon
+    else {
       month <- mhmap[[toupper(mon)]]
     }
-  }
-  if (!is.null(xmlValue(pubDate[["Day"]]))) {
+    month <- as.integer(month)
+  } 
+  if (!is.na(xmlValue(pubDate[["Day"]]))) {
     day <- xmlValue(pubDate[["Day"]])
+    day <- as.integer(day)
   }
   
   #use the year and month of the start time
-  if (!is.null(xmlValue(pubDate[["MedlineDate"]]))) {
+  if (!is.na(xmlValue(pubDate[["MedlineDate"]]))) {
     medlineDate <- xmlValue(pubDate[["MedlineDate"]])
     arr <- strsplit(medlineDate, "-")[[1]]
     start <- arr[[1]]
@@ -272,11 +284,14 @@ for (i in 1:cnt) {
       month <- mhmap[[toupper(startArr[[2]])]]
     }
   }
-  volVector <- c(volVector, as.integer(volume))
-  issueVector <- c(issueVector, as.integer(issue))
-  yearVector <- c(yearVector, as.integer(year))
-  monthVector <- c(monthVector, as.integer(month))
-  dayVector <- c(dayVector, as.integer(day))
+  
+  citedMedVector <- c(citedMedVector, cited_medium)
+  volVector <- c(volVector, volume)
+  issueVector <- c(issueVector, issue)
+  yearVector <- c(yearVector, year)
+  monthVector <- c(monthVector, month)
+  dayVector <- c(dayVector, day)
+  #print(paste0(i, ", ", ISSN, ",", month))
 }
 
 # function to get journalIssueId
@@ -396,7 +411,7 @@ print(head(authorArtDf, 5))
 # Store data into author_article table
 dbWriteTable(dbcon, "AuthorArticle", authorArtDf, append=TRUE, row.names=FALSE)
 
-r <- dbGetQuery(dbcon, "SELECT * FROM JournalIssue")
+r <- dbGetQuery(dbcon, "SELECT * FROM Articles LIMIT 5")
 r
 
 # Disconnect database connection
