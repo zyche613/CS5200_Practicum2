@@ -79,9 +79,9 @@ dbExecute(dbcon, article_schema)
 dbExecute(dbcon, article_author_schema)
 
 # XML and DTD
-xmlLocal <- "pubmed-tfm-xml/pubmed22n0001-tf.xml"
-xmlObj <- xmlTreeParse(xmlLocal, validate=TRUE)
-
+dtd_data <- "http://sp23prac2.s3.us-west-1.amazonaws.com/pubmed.dtd"
+xml_data <- "http://sp23prac2.s3.us-west-1.amazonaws.com/pubmed22n0001-tf.xml"
+xmlObj <- xmlTreeParse(xml_data, validate = TRUE)
 r <- xmlRoot(xmlObj)
 cnt <- xmlSize(r)
 print(cnt)
