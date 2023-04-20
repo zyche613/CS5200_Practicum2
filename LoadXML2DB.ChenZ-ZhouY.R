@@ -79,7 +79,7 @@ dbExecute(dbcon, article_schema)
 dbExecute(dbcon, article_author_schema)
 
 # XML and DTD
-xmlLocal <- "pubmed-tfm-xml/test.xml"
+xmlLocal <- "pubmed-tfm-xml/pubmed22n0001-tf.xml"
 dtdLocal <- "pubmed.dtd"
 
 xmlObj <- xmlTreeParse(xmlLocal, dtdLocal)
@@ -129,6 +129,9 @@ for (i in 1:cnt) {
   numOfAuthor <- 0      
   if (!is.null(authorList)) {
     numOfAuthor <- xmlSize(authorList)
+    isComplete <- "N"
+    isComplete <- xmlAttrs(authorList)[["CompleteYN"]]
+    authorCompVector <- c(authorCompVector, isComplete)
     if (numOfAuthor > 0) {
       for (j in 1:numOfAuthor) {
         collectiveName <- "NA"
@@ -137,7 +140,6 @@ for (i in 1:cnt) {
         initials <- "NA"
         suffix <- "NA"
         affiliation <- "NA"
-        isComplete <- "N"
         # Get CollectiveName if any
         if (!is.null(xmlValue(authorList[[j]][["CollectiveName"]]))) {
           collectiveName = xmlValue(authorList[[j]][["CollectiveName"]])
@@ -162,7 +164,6 @@ for (i in 1:cnt) {
         if (!is.null(xmlValue(authorList[[j]][["AffiliationInfo"]]))) {
           affiliation = xmlValue(authorList[[j]][["AffiliationInfo"]][["Affiliation"]])
         }
-        isComplete <- xmlAttrs(authorList)[["CompleteYN"]]
         # Append all info for future use
         authorCnVector <- c(authorCnVector, collectiveName)
         authorLnVector <- c(authorLnVector, lastName)
@@ -172,7 +173,6 @@ for (i in 1:cnt) {
         authorAffVector <- c(authorAffVector, affiliation)
         articleIdDupVector <- c(articleIdDupVector, i)
         validVector <- c(validVector, xmlAttrs(authorList[[j]])[["ValidYN"]])
-        authorCompVector <- c(authorCompVector, isComplete)
       }
     }  
   } else {
@@ -314,7 +314,6 @@ journalIssueDf <- data.frame(citedMedium=citedMedVector, volume=volVector,
                              issue=issueVector, year=yearVector, month=monthVector, 
                              day=dayVector, ISSN=issnVector, 
                              title=journalTitleVector, ISSNType=issnTypeVector)
-print(length(monthVector))
 
 print(head(journalIssueDf, 5))
 journalIssueDf <- journalIssueDf[!duplicated(journalIssueDf), ]
@@ -322,9 +321,10 @@ journalIssueDf <- cbind(journalIssueId = 1:length(journalIssueDf[,1]), journalIs
 
 # Create articleDf dataframe
 articleDf <- data.frame(articleId=articleIdVector, articleTitle=articleTitleVector, 
-                        completeYN=authorCompVector,citedMedium=citedMedVector, 
-                        volume=volVector, issue=issueVector, ISSN=issnVector, 
-                        journalTitle=journalTitleVector, ISSNType=issnTypeVector, year=yearVector, 
+                        citedMedium=citedMedVector, volume=volVector, 
+                        completeYN=authorCompVector, issue=issueVector, 
+                        ISSN=issnVector, journalTitle=journalTitleVector, 
+                        ISSNType=issnTypeVector, year=yearVector, 
                         month=monthVector, day=dayVector)
 articleDf <- articleDf[!duplicated(articleDf$articleId), ]
 
@@ -401,3 +401,4 @@ r
 
 # Disconnect database connection
 dbDisconnect(dbcon)
+
