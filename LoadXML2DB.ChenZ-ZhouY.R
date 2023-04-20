@@ -17,7 +17,7 @@ library(RCurl)
 library(r2r)
 
 # db setup
-dbcon <- dbConnect(RSQLite::SQLite(), "")
+dbcon <- dbConnect(RSQLite::SQLite(), "prac2.db")
 
 # create db tables
 affiliation_schema <- SQL("CREATE TABLE Affiliation (
