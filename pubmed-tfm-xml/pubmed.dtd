@@ -7,13 +7,13 @@
 <!ELEMENT AuthorList (Author+)>
 <!ELEMENT Author ((LastName, ForeName, Initials, Suffix?, AffiliationInfo?, CollectiveName?) | (CollectiveName))>
 <!ELEMENT CollectiveName (#PCDATA)>
-<!ELEMENT Season (#PCDATA)>
 <!ELEMENT AffiliationInfo (Affiliation)>
 <!ELEMENT Affiliation (#PCDATA)>
 <!ELEMENT ISSN (#PCDATA)>
 <!ELEMENT Volume (#PCDATA)>
 <!ELEMENT Issue (#PCDATA)>
 <!ELEMENT Year (#PCDATA)>
+<!ELEMENT Season (#PCDATA)>
 <!ELEMENT Month (#PCDATA)>
 <!ELEMENT Day (#PCDATA)>
 <!ELEMENT MedlineDate (#PCDATA)>

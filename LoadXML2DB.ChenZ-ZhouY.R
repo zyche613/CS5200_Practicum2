@@ -81,9 +81,8 @@ dbExecute(dbcon, article_author_schema)
 
 # XML and DTD
 xmlLocal <- "pubmed-tfm-xml/pubmed22n0001-tf.xml"
-dtdLocal <- "pubmed.dtd"
-
 xmlObj <- xmlTreeParse(xmlLocal, validate=TRUE)
+
 r <- xmlRoot(xmlObj)
 cnt <- xmlSize(r)
 print(cnt)
