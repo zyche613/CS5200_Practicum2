@@ -17,7 +17,7 @@ library(RCurl)
 library(r2r)
 
 # db setup
-dbcon <- dbConnect(RSQLite::SQLite(), "prac2.db")
+dbcon <- dbConnect(RSQLite::SQLite(), "prac2.sqlite")
 
 # create db tables
 affiliation_schema <- SQL("CREATE TABLE Affiliation (
@@ -37,7 +37,6 @@ author_schema <- SQL("CREATE TABLE Authors (
 
 journalIssue_schema <- SQL("CREATE TABLE JournalIssue (
                            journalIssueId INTEGER PRIMARY KEY,
-                           journalId INTEGER,
                            citedMedium TEXT,
                            volume INTEGER,
                            issue INTEGER,
@@ -128,8 +127,7 @@ for (i in 1:cnt) {
   aArticle <- r[[i]]
   authorList <- aArticle[[1]][["AuthorList"]]
   numOfAuthor <- 0
-  if (length(authorList) > 0) {
-    if (!is.na(authorList)) {
+  if (!is.null(authorList)) {
     numOfAuthor <- xmlSize(authorList)
     isComplete <- "N"
     isComplete <- xmlAttrs(authorList)[["CompleteYN"]]
@@ -177,17 +175,6 @@ for (i in 1:cnt) {
         validVector <- c(validVector, xmlAttrs(authorList[[j]])[["ValidYN"]])
       }
     }  
-  } else {
-      authorCnVector <- c(authorCnVector, "NA")
-      authorLnVector <- c(authorLnVector, "NA")
-      authorFnVector <- c(authorFnVector, "NA")
-      authorInitVector <- c(authorInitVector, "NA")
-      authorSuffVector <- c(authorSuffVector, "NA")
-      authorAffVector <- c(authorAffVector, "NA")
-      articleIdDupVector <- c(articleIdDupVector, i)
-      validVector <- c(validVector, "N")
-      authorCompVector <- c(authorCompVector, "N")
-    }
   } else {
       authorCnVector <- c(authorCnVector, "NA")
       authorLnVector <- c(authorLnVector, "NA")
@@ -359,7 +346,7 @@ articleDf <- subset(articleDf, select=c(articleId, articleTitle, completeYN, jou
 print("articleDf")
 print(head(articleDf, 5))
 # Remove redundant columns
-journalIssueDf <- subset(journalIssueDf, select = -c(ISSN, title, ISSNType))
+journalIssueDf <- subset(journalIssueDf, select = -c(journalId, ISSN, title, ISSNType))
 print("journalIssueDf")
 print(head(journalIssueDf, 5))
 dbWriteTable(dbcon, "journalIssue", journalIssueDf, append=TRUE, row.names=FALSE)
