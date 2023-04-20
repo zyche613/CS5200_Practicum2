@@ -83,10 +83,11 @@ dbExecute(dbcon, article_author_schema)
 xmlLocal <- "pubmed-tfm-xml/pubmed22n0001-tf.xml"
 dtdLocal <- "pubmed.dtd"
 
-xmlObj <- xmlTreeParse(xmlLocal, dtdLocal)
+xmlObj <- xmlTreeParse(xmlLocal, validate=TRUE)
 r <- xmlRoot(xmlObj)
 cnt <- xmlSize(r)
 print(cnt)
+
 # Load data from xml by node traversal
 articleIdVector <- c()
 articleIdDupVector <- c()
