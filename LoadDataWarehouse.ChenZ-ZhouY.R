@@ -30,7 +30,7 @@ mydb <-  dbConnect(RMySQL::MySQL(), user = db_user, password = db_password,
 
 # Connect to the SQLite database
 fpath = "./"
-dbfile = "article.db"
+dbfile = "prac2.sqlite"
 litedb <- dbConnect(RSQLite::SQLite(), paste0(fpath, dbfile))
 
 # Create the Journal Fact Table
@@ -51,38 +51,54 @@ dbExecute(mydb,
   volume INTEGER,
   issue INTEGER,
   year INTEGER,
+  quarter INTEGER,
   month INTEGER,
+  day INTEGER,
   articleNumbers INTEGER,
-  authoerNumbers INTEGER，
+  authorNumbers INTEGER,
   FOREIGN KEY (journalID) REFERENCES JournalDim (journalID)
 )")
 
 # Get Journal dimention from the SQLite database
 journal_dim <- dbGetQuery(litedb, 
-                          "SELECT *
+                          "SELECT journalID, journalTitle, ISSN, ISOAbbreviation
                           FROM journals
                           ")
 
 # Get Journal dimention from the SQLite database
 journal_fact <- dbGetQuery(litedb, "
 SELECT journalIssueID, journalID, citedMedium, volume, issue, year,
-(CASE 
-WHEN month IN (1,2,3) THEN 1
-WHEN month IN (4,5,6) THEN 2
-WHEN month IN (7,8,9) THEN 3
-WHEN month IN (10,11,12) THEN 4
-ELSE 0
-END) AS quarter, month, day, COUNT(DISTINCT articleID), COUNT(DISTINCT authorID)
-FROM JournalIssue
-NATURAL JOIN Articles
-NATURAL JOIN ArticleAuthor
-NATURAL JOIN Authors
-GROUP BY journalIssueID
+quarter, month, day, COUNT(articleID) AS articleNumbers, SUM(authorNum) AS authorNumbers
+FROM (SELECT journalIssueID, journalID, citedMedium, volume, issue, year, (CASE 
+      WHEN month IN (1,2,3) THEN 1
+      WHEN month IN (4,5,6) THEN 2
+      WHEN month IN (7,8,9) THEN 3
+      WHEN month IN (10,11,12) THEN 4
+      ELSE 0
+      END) AS quarter, month, day, articleID, COUNT(authorID) AS authorNum
+      FROM JournalIssue
+      NATURAL JOIN Articles
+      NATURAL JOIN AuthorArticle
+      NATURAL JOIN Authors
+      GROUP BY articleID)
+GROUP BY JournalIssueID
 ")
+
+# print(journal_dim)
+# print(journal_fact)
 
 # Write to MySQL database
 dbSendQuery(mydb, "SET GLOBAL local_infile = true;")
-dbWriteTable(mydb,"Journal", journal_fact, append=TRUE, row.names=FALSE)
+rownames(journal_dim) <- NULL
+rownames(journal_fact) <- NULL
+dbWriteTable(mydb,"JournalDim", journal_dim, append=TRUE, row.names=FALSE)
+dbWriteTable(mydb,"JournalFact", journal_fact, append=TRUE, row.names=FALSE)
+
+# factTab <- dbGetQuery(mydb, "SELECT * FROM journalFact LIMIT 20")
+# print(factTab)
+# factDim <- dbGetQuery(mydb, "SELECT * FROM journalDim LIMIT 20")
+# print(factDim)
+
 
 # Your star schema must support analytical queries such as these:
 
@@ -90,7 +106,7 @@ dbWriteTable(mydb,"Journal", journal_fact, append=TRUE, row.names=FALSE)
 res1 <- dbGetQuery(mydb, "SELECT journalTitle, year, SUM(articleNumbers) 
            FROM JournalFact NATURAL JOIN JournalDim
            WHERE year = 2012 OR year = 2013
-           GROUP BY journalID, year
+           GROUP BY journalTitle, year
            ")
 print(res1)
 
@@ -98,12 +114,12 @@ print(res1)
 res2 <- dbGetQuery(mydb, "SELECT journalTitle, year, quarter, SUM(articleNumbers)
            FROM JournalFact NATURAL JOIN JournalDim
            WHERE year >= 2012 AND year <= 2015
-           GROUP BY journalID, year, quarter
+           GROUP BY journalTitle, year, quarter
            ")
 print(res2)
 
 # How many articles were published each quarter (across all years)?
-res <- dbGetQuery(mydb, "SELECT quarter, SUM(articleNumbers)
+res3 <- dbGetQuery(mydb, "SELECT quarter, SUM(articleNumbers)
            FROM JournalFact
            GROUP BY quarter
            ")
@@ -116,5 +132,18 @@ res4 <- dbGetQuery(mydb, "SELECT year, SUM(authorNumbers)
            ")
 print(res4)
   
+# Disconnect the MySQL database
+killDbConnections <- function () {
+  all_cons <- dbListConnections(MySQL())
+  print(all_cons)
+  for(con in all_cons)
+    +  dbDisconnect(con)
+  print(paste(length(all_cons), " connections killed."))
+}
+killDbConnections()
 
-
+# Disconnect the SQLite database
+if(dbIsValid(litedb)){
+  dbDisconnect(litedb)
+  print("DB has been disconncted!")
+}
