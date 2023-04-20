@@ -19,6 +19,13 @@ library(r2r)
 # db setup
 dbcon <- dbConnect(RSQLite::SQLite(), "prac2.sqlite")
 
+dbExecute(dbcon, "DROP TABLE IF EXISTS Affiliation")
+dbExecute(dbcon, "DROP TABLE IF EXISTS Authors")
+dbExecute(dbcon, "DROP TABLE IF EXISTS JournalIssue")
+dbExecute(dbcon, "DROP TABLE IF EXISTS Journals")
+dbExecute(dbcon, "DROP TABLE IF EXISTS Articles")
+dbExecute(dbcon, "DROP TABLE IF EXISTS AuthorArticle")
+
 # create db tables
 affiliation_schema <- SQL("CREATE TABLE Affiliation (
                           affiliationId INTEGER PRIMARY KEY,

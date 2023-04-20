@@ -25,23 +25,25 @@ mydb <-  dbConnect(RMySQL::MySQL(), user = db_user, password = db_password,
 ## 2.use markdown to write a "report" which shows the results of the following analytical queries against your MySQL data warehouse from Part 2
 
 # Analytical Query I: Top five journals with the most articles published in them for the time period. 
-```{sql connection=mydb}
-SELECT journalTitle, sum(articleNumbers) AS sumOfArticles
-FROM journalFact NATURAL JOIN journalDim
-GROUP BY journalID
-ORDER BY sumOfArticles DESC
-LIMIT 5
+```{r, top_5_journals, eval = T, warning = F}
+# Store the result to a dataframe
+top_5_journals <- dbGetQuery(mydb, 
+   "SELECT journalTitle, sum(articleNumbers) AS sumOfArticles
+    FROM journalFact NATURAL JOIN journalDim
+    GROUP BY journalTitle
+    ORDER BY sumOfArticles DESC
+    LIMIT 5")
+top_5_journals
 ```
 
 # Analytical Query II: Number of articles per journal per year broken down by quarter.
-```{r , eval = T, warning = F}
+```{r, journal_per_year, eval = T, warning = F}
 # Store the result to a dataframe
 journal_per_year <- dbGetQuery(mydb, 
-   "SELECT journalID, journalTitle, year, quarter, SUM(articleNumbers) AS sumPerQuarter
+   "SELECT journalTitle, year, quarter, SUM(articleNumbers) AS sumPerQuarter
     FROM JournalFact NATURAL JOIN JournalDim
-    WHERE year >= 2012 AND year <= 2015
-    GROUP BY journalID, year, quarter")
-incidents_by_phase_month
+    GROUP BY journalTitle, year, quarter")
+journal_per_year
 ```
 
 
@@ -53,5 +55,12 @@ incidents_by_phase_month
 Disconnect to the databases
 ```{r}
 # Disconnect the MySQL database
-dbDisconnect(mydb)
+killDbConnections <- function () {
+  all_cons <- dbListConnections(MySQL())
+  print(all_cons)
+  for(con in all_cons)
+    +  dbDisconnect(con)
+  print(paste(length(all_cons), " connections killed."))
+}
+killDbConnections()
 ```
