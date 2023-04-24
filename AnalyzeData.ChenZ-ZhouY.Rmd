@@ -1,5 +1,6 @@
 ---
 title: "Practicum 2, part3, Explore and Mine Data"
+date: "Spring 2023"
 author: "Zhengyuan Chen & Yi Zhou"
 output: html_notebook
 ---
