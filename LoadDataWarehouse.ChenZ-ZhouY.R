@@ -64,12 +64,14 @@ journal_dim <- dbGetQuery(litedb,
                           "SELECT journalID, journalTitle, ISSN, ISOAbbreviation
                           FROM journals
                           ")
+print(journal_dim)
+
 
 # Get Journal dimention from the SQLite database
 journal_fact <- dbGetQuery(litedb, "
 SELECT journalIssueID, journalID, citedMedium, volume, issue, year,
 quarter, month, day, COUNT(articleID) AS articleNumbers, SUM(authorNum) AS authorNumbers
-FROM (SELECT journalIssueID, journalID, citedMedium, volume, issue, year, (CASE 
+FROM (SELECT journalIssueID, journalID, citedMedium, volume, issue, year, (CASE
       WHEN month IN (1,2,3) THEN 1
       WHEN month IN (4,5,6) THEN 2
       WHEN month IN (7,8,9) THEN 3
@@ -84,8 +86,9 @@ FROM (SELECT journalIssueID, journalID, citedMedium, volume, issue, year, (CASE
 GROUP BY JournalIssueID
 ")
 
+
 # print(journal_dim)
-# print(journal_fact)
+print(journal_fact)
 
 # Write to MySQL database
 dbSendQuery(mydb, "SET GLOBAL local_infile = true;")
